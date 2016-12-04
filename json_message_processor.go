@@ -218,7 +218,12 @@ func fixupMessageType(routingKey string) string {
 func ProcessJSONMessage(msg map[string]interface{}, routingKey string) ([]map[string]interface{}, error) {
 	msg["type"] = fixupMessageType(routingKey)
 	fixupMessage(routingKey, msg)
-
+	
+	if strings.HasPrefix(msg["type"], "feed.storage.") && config.FeedReportDetails {
+		appendFeedReportDetails(msg)		
+	}
+	
+	
 	msgs := make([]map[string]interface{}, 0, 1)
 
 	// explode watchlist/feed hit messages that include a "docs" array
