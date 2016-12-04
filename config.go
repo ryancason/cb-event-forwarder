@@ -67,6 +67,9 @@ type Configuration struct {
 	BundleSendTimeout   time.Duration
 	BundleSizeMax       int64
 
+	// Feed Report Details
+	FeedReportDetails	bool
+	
 	TLSConfig *tls.Config
 }
 
@@ -190,7 +193,7 @@ func ParseConfig(fn string) (Configuration, error) {
 	config.S3ACLPolicy = nil
 	config.S3ServerSideEncryption = nil
 	config.S3CredentialProfileName = nil
-
+	
 	// required values
 	val, ok := input.Get("bridge", "server_name")
 	if !ok {
@@ -443,6 +446,20 @@ func ParseConfig(fn string) (Configuration, error) {
 
 	config.parseEventTypes(input)
 
+	// Feed Report Details
+	config.FeedReportDetails = false
+	feedreportDetails, ok := input.Get("bridge", "feed_report_details")
+	if ok {
+		boolval, err := strconv.ParseBool(feedreportDetails)
+		if err == nil {
+			if boolval == true {
+				config.FeedReportDetails = true
+			}
+		} else {
+			errs.addErrorString("Unknown value for 'feed_report_details': valid values are true, false, 1, 0. Default is 'false'")
+		}
+	}
+	
 	if !errs.Empty {
 		return config, errs
 	} else {
